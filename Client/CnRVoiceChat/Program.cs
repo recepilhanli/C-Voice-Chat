@@ -21,6 +21,11 @@ namespace CnRVoiceChat
                 if(arg.Contains("[start]")) start = true;
             }
 
+            if (start)
+            {
+                Application.Exit();
+                return;
+            }
 
             ApplicationConfiguration.Initialize();
             Application.Run(new CnRVoiceMain());
