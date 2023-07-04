@@ -55,7 +55,7 @@ namespace Main
                     // broadcast
                     foreach (TcpClient connectedClient in clients)
                     {
-                        if (connectedClient != client) 
+                        if (connectedClient != client)
                         {
                             NetworkStream connectedStream = connectedClient.GetStream();
                             connectedStream.Write(buffer, 0, bytesRead);
