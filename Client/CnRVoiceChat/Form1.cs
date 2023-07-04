@@ -35,7 +35,6 @@ namespace CnRVoiceChat
             };
             waveIn.DataAvailable += WaveIn_DataAvailable;
 
-            // WaveOutEvent cihazýný baþlat
             WaveOutEvent waveOut = new WaveOutEvent();
             waveOut.Init(new WaveProvider());
 
@@ -48,7 +47,7 @@ namespace CnRVoiceChat
             }
             catch(Exception ex)
             {
-                statelabel.Text = "Hata:" + ex.Message;
+                statelabel.Text = "Err:" + ex.Message;
 
             }
 
