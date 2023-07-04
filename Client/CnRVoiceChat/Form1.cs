@@ -1,4 +1,5 @@
 using NAudio.Wave;
+using System.Diagnostics;
 using VoiceChat;
 
 namespace CnRVoiceChat
@@ -75,7 +76,7 @@ namespace CnRVoiceChat
 
         private void XButton_Click(object sender, EventArgs e)
         {
-            Application.Exit();
+            Process.GetCurrentProcess().Kill();
         }
 
 
