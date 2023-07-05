@@ -123,6 +123,8 @@
             this.volumeSlider1.Name = "volumeSlider1";
             this.volumeSlider1.Size = new System.Drawing.Size(123, 16);
             this.volumeSlider1.TabIndex = 7;
+            this.volumeSlider1.VolumeChanged += new System.EventHandler(this.Slider1Changed);
+            this.volumeSlider1.Load += new System.EventHandler(this.volumeSlider1_Load);
             // 
             // label1
             // 
@@ -148,6 +150,7 @@
             this.volumeSlider2.Name = "volumeSlider2";
             this.volumeSlider2.Size = new System.Drawing.Size(123, 16);
             this.volumeSlider2.TabIndex = 9;
+            this.volumeSlider2.VolumeChanged += new System.EventHandler(this.Slider2Changed);
             // 
             // CnRVoiceMain
             // 

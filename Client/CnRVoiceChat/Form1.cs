@@ -1,3 +1,4 @@
+using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using System.Diagnostics;
 using VoiceChat;
@@ -6,14 +7,22 @@ namespace CnRVoiceChat
 {
 
 
- 
+
     public partial class CnRVoiceMain : Form
     {
-       VoiceClient client;
+        VoiceClient client;
 
         static string Nickname = "null";
 
 
+        WaveInEvent waveIn = new NAudio.Wave.WaveInEvent
+        {
+            DeviceNumber = 0, // indicates which microphone to use
+            WaveFormat = new NAudio.Wave.WaveFormat(rate: 44100, bits: 16, channels: 1),
+            BufferMilliseconds = 20
+        };
+
+        WaveOutEvent waveOut = new WaveOutEvent();
 
 
         void OnVoiceReach(object sender, ChatArgs e)
@@ -26,30 +35,29 @@ namespace CnRVoiceChat
         {
             InitializeComponent();
 
-
-
-            var waveIn = new NAudio.Wave.WaveInEvent
-            {
-                DeviceNumber = 0, // indicates which microphone to use
-                WaveFormat = new NAudio.Wave.WaveFormat(rate: 44100, bits: 16, channels: 1),
-                BufferMilliseconds = 20
-            };
             waveIn.DataAvailable += WaveIn_DataAvailable;
+            Init();
 
-            WaveOutEvent waveOut = new WaveOutEvent();
+        }
+
+        private void Init()
+        {
+
+
+
             waveOut.Init(new WaveProvider());
 
             try
             {
-            
-            waveIn.StartRecording();
 
-            waveOut.Play();
+                waveIn.StartRecording();
+
+                waveOut.Play();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 statelabel.Text = "Err:" + ex.Message;
-
+                return;
             }
 
 
@@ -58,7 +66,7 @@ namespace CnRVoiceChat
 
 
             client = new VoiceClient();
-            client.OnVoiceReach += this.OnVoiceReach;
+            client.OnVoiceReach += OnVoiceReach;
         }
 
 
@@ -66,7 +74,7 @@ namespace CnRVoiceChat
         {
 
 
-            
+
 
 
             client?.SendVoice(e.Buffer, e.BytesRecorded);
@@ -82,23 +90,24 @@ namespace CnRVoiceChat
 
         public class WaveProvider : IWaveProvider
         {
-            public static BufferedWaveProvider BufferedWaveProvider { get; private set; }
+            public static BufferedWaveProvider bufferedWaveProvider { get; private set; }
 
             public WaveFormat WaveFormat => new WaveFormat(44100, 16, 1);
 
             public int Read(byte[] buffer, int offset, int count)
             {
-                return BufferedWaveProvider.Read(buffer, offset, count);
+                return bufferedWaveProvider.Read(buffer, offset, count);
             }
 
             public static void Write(byte[] buffer, int offset, int count)
             {
-                BufferedWaveProvider.AddSamples(buffer, offset, count);
+
+                bufferedWaveProvider.AddSamples(buffer, offset, count);
             }
 
             public WaveProvider()
             {
-                BufferedWaveProvider = new BufferedWaveProvider(WaveFormat);
+                bufferedWaveProvider = new BufferedWaveProvider(WaveFormat);
             }
         }
 
@@ -106,5 +115,42 @@ namespace CnRVoiceChat
         {
 
         }
+
+        private void volumeSlider1_Load(object sender, EventArgs e)
+        {
+
+
+        }
+
+
+
+        private void Slider1Changed(object sender, EventArgs e)
+        {
+            try
+            {
+
+                MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
+                MMDevice microphone = enumerator.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Communications);
+
+                microphone.AudioEndpointVolume.MasterVolumeLevelScalar = volumeSlider1.Volume;
+            }
+            catch
+            {
+                statelabel.Text = "Ses duzeyini ayarlarken bir hata olustu!";
+                return;
+            }
+
+            statelabel.Text = "Mikrofon ses duzeyi ayarlandi.";
+
+        }
+
+        private void Slider2Changed(object sender, EventArgs e)
+        {
+            waveOut.Volume = volumeSlider2.Volume;
+
+            statelabel.Text = "Kullanici ses duzeyi ayarlandi.";
+        }
+
+
     }
 }
