@@ -129,7 +129,6 @@
             this.volumeSlider1.Size = new System.Drawing.Size(123, 16);
             this.volumeSlider1.TabIndex = 7;
             this.volumeSlider1.VolumeChanged += new System.EventHandler(this.Slider1Changed);
-            this.volumeSlider1.Load += new System.EventHandler(this.volumeSlider1_Load);
             // 
             // label1
             // 
@@ -196,7 +195,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "SA:MP Turkiye CnR - Sesli Sohbet";
             this.TransparencyKey = System.Drawing.Color.Turquoise;
-            this.Load += new System.EventHandler(this.CnRVoiceMain_Load);
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.CnRVoiceMain_FormClosed);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.XButton)).EndInit();

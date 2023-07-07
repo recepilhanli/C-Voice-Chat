@@ -86,19 +86,19 @@ namespace CnRVoiceChat
         {
 
 
-            float maxValue = 0;
-            for (int i = 0; i < e.BytesRecorded; i += 2)
-            {
-                short sample = (short)((e.Buffer[i + 1] << 8) | e.Buffer[i]);
-                float sampleValue = sample / 32768f;
-                maxValue = Math.Max(maxValue, Math.Abs(sampleValue));
-            }
+            //float maxValue = 0;
+            //for (int i = 0; i < e.BytesRecorded; i += 2)
+            //{
+            //    short sample = (short)((e.Buffer[i + 1] << 8) | e.Buffer[i]);
+            //    float sampleValue = sample / 32768f;
+            //    maxValue = Math.Max(maxValue, Math.Abs(sampleValue));
+            //}
 
 
-            float threshold = 0.1f;
+            //float threshold = 0.25f;
 
-            if (maxValue >= threshold)
-                client?.SendVoice(e.Buffer, e.BytesRecorded);
+            //if (maxValue >= threshold)
+            client?.SendVoice(e.Buffer, e.BytesRecorded);
 
 
         }
@@ -133,17 +133,6 @@ namespace CnRVoiceChat
             {
                 bufferedWaveProvider = new BufferedWaveProvider(WaveFormat);
             }
-        }
-
-        private void CnRVoiceMain_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void volumeSlider1_Load(object sender, EventArgs e)
-        {
-
-
         }
 
 
@@ -186,6 +175,9 @@ namespace CnRVoiceChat
             if (processes.Length == 0) Process.GetCurrentProcess().Kill();
         }
 
-
+        private void CnRVoiceMain_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Process.GetCurrentProcess().Kill();
+        }
     }
 }
