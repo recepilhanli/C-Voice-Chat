@@ -77,7 +77,7 @@ namespace CnRVoiceChat
 
             client = new VoiceClient();
             client.OnVoiceReach += OnVoiceReach;
-       
+
         }
 
 
@@ -86,7 +86,20 @@ namespace CnRVoiceChat
         {
 
 
-            client?.SendVoice(e.Buffer, e.BytesRecorded);
+            float maxValue = 0;
+            for (int i = 0; i < e.BytesRecorded; i += 2)
+            {
+                short sample = (short)((e.Buffer[i + 1] << 8) | e.Buffer[i]);
+                float sampleValue = sample / 32768f;
+                maxValue = Math.Max(maxValue, Math.Abs(sampleValue));
+            }
+
+
+            float threshold = 0.1f;
+
+            if (maxValue >= threshold)
+                client?.SendVoice(e.Buffer, e.BytesRecorded);
+
 
         }
 
@@ -170,7 +183,7 @@ namespace CnRVoiceChat
         private void Check(object sender, EventArgs e)
         {
             var processes = Process.GetProcessesByName("gta_sa.exe");
-            if(processes.Length == 0) Process.GetCurrentProcess().Kill();
+            if (processes.Length == 0) Process.GetCurrentProcess().Kill();
         }
 
 
