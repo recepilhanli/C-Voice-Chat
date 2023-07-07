@@ -23,13 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\..\..\unnamed.jpg">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="NAudio" Version="2.1.0" />
   </ItemGroup>
 
