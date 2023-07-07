@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CnRVoiceMain));
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
@@ -40,6 +41,8 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.volumeSlider2 = new NAudio.Gui.VolumeSlider();
+            this.retrybutton = new System.Windows.Forms.Button();
+            this.GtaCheck = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.XButton)).BeginInit();
@@ -50,7 +53,7 @@
             this.pictureBox1.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(801, 35);
+            this.pictureBox1.Size = new System.Drawing.Size(369, 35);
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
@@ -59,7 +62,7 @@
             this.pictureBox2.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.pictureBox2.Location = new System.Drawing.Point(0, 156);
             this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(671, 38);
+            this.pictureBox2.Size = new System.Drawing.Size(369, 38);
             this.pictureBox2.TabIndex = 1;
             this.pictureBox2.TabStop = false;
             // 
@@ -100,6 +103,7 @@
             // checkBox1
             // 
             this.checkBox1.AutoSize = true;
+            this.checkBox1.Enabled = false;
             this.checkBox1.Location = new System.Drawing.Point(12, 58);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(80, 19);
@@ -110,6 +114,7 @@
             // checkBox2
             // 
             this.checkBox2.AutoSize = true;
+            this.checkBox2.Enabled = false;
             this.checkBox2.Location = new System.Drawing.Point(12, 106);
             this.checkBox2.Name = "checkBox2";
             this.checkBox2.Size = new System.Drawing.Size(127, 19);
@@ -152,12 +157,27 @@
             this.volumeSlider2.TabIndex = 9;
             this.volumeSlider2.VolumeChanged += new System.EventHandler(this.Slider2Changed);
             // 
+            // retrybutton
+            // 
+            this.retrybutton.Location = new System.Drawing.Point(250, 163);
+            this.retrybutton.Name = "retrybutton";
+            this.retrybutton.Size = new System.Drawing.Size(106, 23);
+            this.retrybutton.TabIndex = 11;
+            this.retrybutton.Text = "Tekrar Dene";
+            this.retrybutton.UseVisualStyleBackColor = true;
+            this.retrybutton.Click += new System.EventHandler(this.retrybutton_Click);
+            // 
+            // GtaCheck
+            // 
+            this.GtaCheck.Interval = 2000;
+            this.GtaCheck.Tick += new System.EventHandler(this.Check);
+            // 
             // CnRVoiceMain
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.SystemColors.ScrollBar;
             this.ClientSize = new System.Drawing.Size(368, 194);
+            this.Controls.Add(this.retrybutton);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.volumeSlider2);
             this.Controls.Add(this.label1);
@@ -198,5 +218,7 @@
         private Label label1;
         private Label label2;
         private NAudio.Gui.VolumeSlider volumeSlider2;
+        private Button retrybutton;
+        private System.Windows.Forms.Timer GtaCheck;
     }
 }

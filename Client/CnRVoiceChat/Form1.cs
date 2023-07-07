@@ -1,7 +1,9 @@
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using System.Diagnostics;
+using System.Timers;
 using VoiceChat;
+
 
 namespace CnRVoiceChat
 {
@@ -10,9 +12,14 @@ namespace CnRVoiceChat
 
     public partial class CnRVoiceMain : Form
     {
-        VoiceClient client;
+        private VoiceClient client;
 
-        static string Nickname = "null";
+        MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
+
+
+        //[DllImport("STCnR.asi")]
+
+        //private static extern FVector GetPlayerPos(); 
 
 
         WaveInEvent waveIn = new NAudio.Wave.WaveInEvent
@@ -35,17 +42,20 @@ namespace CnRVoiceChat
         {
             InitializeComponent();
 
-            waveIn.DataAvailable += WaveIn_DataAvailable;
-            Init();
 
+
+
+            waveIn.DataAvailable += WaveIn_DataAvailable;
+
+            waveOut.Init(new WaveProvider());
+
+            Init();
+            //Vector location = Vector.Serialize(GetPlayerPos());
+            //MessageBox.Show(location.x + " - " + location.y + " - " + location.z);
         }
 
         private void Init()
         {
-
-
-
-            waveOut.Init(new WaveProvider());
 
             try
             {
@@ -56,30 +66,31 @@ namespace CnRVoiceChat
             }
             catch (Exception ex)
             {
-                statelabel.Text = "Err:" + ex.Message;
+                statelabel.Text = "Mikrofon bulunamadi, tekrar deneniyor..";
+
                 return;
             }
 
-
-
             statelabel.Text = "Program baslatildi.";
-
+            retrybutton.Click -= retrybutton_Click;
+            retrybutton.Visible = false;
 
             client = new VoiceClient();
             client.OnVoiceReach += OnVoiceReach;
+       
         }
+
 
 
         void WaveIn_DataAvailable(object? sender, NAudio.Wave.WaveInEventArgs e)
         {
 
 
-
-
-
             client?.SendVoice(e.Buffer, e.BytesRecorded);
 
         }
+
+
 
 
         private void XButton_Click(object sender, EventArgs e)
@@ -129,7 +140,6 @@ namespace CnRVoiceChat
             try
             {
 
-                MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
                 MMDevice microphone = enumerator.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Communications);
 
                 microphone.AudioEndpointVolume.MasterVolumeLevelScalar = volumeSlider1.Volume;
@@ -149,6 +159,18 @@ namespace CnRVoiceChat
             waveOut.Volume = volumeSlider2.Volume;
 
             statelabel.Text = "Kullanici ses duzeyi ayarlandi.";
+        }
+
+        private void retrybutton_Click(object sender, EventArgs e)
+        {
+            Init();
+        }
+
+
+        private void Check(object sender, EventArgs e)
+        {
+            var processes = Process.GetProcessesByName("gta_sa.exe");
+            if(processes.Length == 0) Process.GetCurrentProcess().Kill();
         }
 
 
