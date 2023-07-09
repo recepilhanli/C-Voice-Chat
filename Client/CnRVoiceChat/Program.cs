@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace CnRVoiceChat
 {
     internal static class Program
@@ -18,17 +20,24 @@ namespace CnRVoiceChat
 
             foreach(var arg in args)
             {
-                if(arg.Contains("[start]")) start = true;
+                if(arg.Contains("-start")) start = true;
             }
 
-            if (start)
+            if (!start)
             {
-                Application.Exit();
-                return;
+                //Process.GetCurrentProcess().Kill();
+                //return;
             }
 
             ApplicationConfiguration.Initialize();
             Application.Run(new CnRVoiceMain());
         }
+
+
+
+
+
+
+
     }
 }

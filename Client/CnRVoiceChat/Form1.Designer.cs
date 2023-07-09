@@ -103,13 +103,13 @@
             // checkBox1
             // 
             this.checkBox1.AutoSize = true;
-            this.checkBox1.Enabled = false;
             this.checkBox1.Location = new System.Drawing.Point(12, 58);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(80, 19);
             this.checkBox1.TabIndex = 5;
             this.checkBox1.Text = "Bas Konuş";
             this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // checkBox2
             // 
@@ -190,12 +190,15 @@
             this.Controls.Add(this.pictureBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.KeyPreview = true;
             this.Name = "CnRVoiceMain";
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "SA:MP Turkiye CnR - Sesli Sohbet";
             this.TransparencyKey = System.Drawing.Color.Turquoise;
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.CnRVoiceMain_FormClosed);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.CnRVoiceMain_KeyDown);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.CnRVoiceMain_KeyUp);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.XButton)).EndInit();

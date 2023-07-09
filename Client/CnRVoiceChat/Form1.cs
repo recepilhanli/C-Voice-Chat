@@ -16,7 +16,9 @@ namespace CnRVoiceChat
 
         MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
 
-
+        char pushToTalkKey = 'K';
+        bool pushToTalk = false;
+        bool isTalking = false;
         //[DllImport("STCnR.asi")]
 
         //private static extern FVector GetPlayerPos(); 
@@ -44,8 +46,7 @@ namespace CnRVoiceChat
 
 
 
-
-            waveIn.DataAvailable += WaveIn_DataAvailable;
+            if (!pushToTalk) waveIn.DataAvailable += WaveIn_DataAvailable;
 
             waveOut.Init(new WaveProvider());
 
@@ -171,13 +172,104 @@ namespace CnRVoiceChat
 
         private void Check(object sender, EventArgs e)
         {
-            var processes = Process.GetProcessesByName("gta_sa.exe");
-            if (processes.Length == 0) Process.GetCurrentProcess().Kill();
+            //var processes = Process.GetProcessesByName("gta_sa.exe");
+            //if (processes.Length == 0) Process.GetCurrentProcess().Kill();
+
+
         }
 
         private void CnRVoiceMain_FormClosed(object sender, FormClosedEventArgs e)
         {
             Process.GetCurrentProcess().Kill();
+        }
+
+
+
+        void GetConfig()
+        {
+            if (!File.Exists("cnr.ini"))
+            {
+                CreateConfigFile();
+                return;
+            }
+
+
+
+
+        }
+
+
+
+        void CreateConfigFile()
+        {
+            string path = "cnr.ini";
+
+            try
+            {
+
+                File.Create(path);
+                StreamWriter writer = new StreamWriter(path);
+                writer.WriteLine("#SA:MP Turkiye CnR Client Ayarlari");
+                writer.WriteLine("#Ayarlarda 0-> Kapali, 1-> Acik anlamina gelir.");
+                writer.WriteLine("#Ses Seviyesi ayarlari 0-1 arasi ondalik sayilarla olmalidir.");
+                writer.WriteLine();
+                writer.WriteLine();
+                writer.WriteLine();
+                writer.WriteLine("{Ayarlar]");
+                writer.WriteLine();
+                writer.WriteLine("Bas-Konus = K");
+                writer.WriteLine("Bas-Konus Tusu = K");
+                writer.WriteLine("Yakinlik Hassasiyeti = 0");
+                writer.WriteLine("Mikrofon Ses Seviyesi = 1");
+                writer.WriteLine("Kullanici Ses Seviyesi = 1");
+
+            }
+            catch
+            {
+                statelabel.Text = "Ayarlar dosyasi olusturulamadi!";
+            }
+        }
+
+
+        private void CnRVoiceMain_KeyDown(object sender, KeyEventArgs e)
+        {
+            char key = Char.ToLower((char)e.KeyCode);
+            char userKey = Char.ToLower(pushToTalkKey);
+
+            if (key == userKey && pushToTalk && !isTalking)
+            {
+                isTalking = true;
+                MessageBox.Show("Test");
+                waveIn.DataAvailable += WaveIn_DataAvailable;
+            }
+
+        }
+
+        private void CnRVoiceMain_KeyUp(object sender, KeyEventArgs e)
+        {
+            char key = Char.ToLower((char)e.KeyCode);
+            char userKey = Char.ToLower(pushToTalkKey);
+
+            if (key == userKey && pushToTalk && isTalking)
+            {
+                isTalking = false;
+                waveIn.DataAvailable -= WaveIn_DataAvailable;
+            }
+
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e) //push to talk
+        {
+            pushToTalk = checkBox1.Checked;
+
+
+
+            if(pushToTalk)
+            {
+                MessageBox.Show($"{pushToTalkKey} tusu ile konusabilirsiniz."); 
+                waveIn.DataAvailable -= WaveIn_DataAvailable;
+            }
+            else waveIn.DataAvailable += WaveIn_DataAvailable;
         }
     }
 }
