@@ -1,6 +1,7 @@
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 using System.Timers;
 using VoiceChat;
 
@@ -22,6 +23,7 @@ namespace CnRVoiceChat
         //[DllImport("STCnR.asi")]
 
         //private static extern FVector GetPlayerPos(); 
+
 
 
         WaveInEvent waveIn = new NAudio.Wave.WaveInEvent
@@ -187,15 +189,28 @@ namespace CnRVoiceChat
 
         void GetConfig()
         {
-            if (!File.Exists("cnr.ini"))
+            string path = "cnr.ini";
+            if (!File.Exists(path))
             {
                 CreateConfigFile();
                 return;
             }
 
+            StreamReader reader = new StreamReader(path);
 
+            string line;
+            string pattern = @"(\w+)\s*=\s*(\w+)";
+            while ((line = reader.ReadLine()) != null)
+            {
+                Match match = Regex.Match(line, pattern);
+                if(match.Success)
+                {
+                    string key = match.Groups[1].Value;
+                    string value = match.Groups[2].Value;
+                    if()
+                }
 
-
+            }
         }
 
 
