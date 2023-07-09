@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 
-namespace Vectors
+namespace Vector
 {
     [StructLayout(LayoutKind.Sequential)]
     public class FVector
@@ -31,7 +31,7 @@ namespace Vectors
 
         public static float GetDistance(Vector v1, Vector v2)
         {
-            float dist = Math.Abs((v1.x - v2.x) + (v1.y - v2.y) + (v1.z - v2.z));
+            float dist = Math.Abs(v1.x - v2.x + (v1.y - v2.y) + (v1.z - v2.z));
             return dist;
         }
 

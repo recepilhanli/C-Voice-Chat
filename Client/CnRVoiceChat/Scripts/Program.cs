@@ -18,9 +18,9 @@ namespace CnRVoiceChat
 
             bool start = false;
 
-            foreach(var arg in args)
+            foreach (var arg in args)
             {
-                if(arg.Contains("-start")) start = true;
+                if (arg.Contains("-start")) start = true;
             }
 
             if (!start)

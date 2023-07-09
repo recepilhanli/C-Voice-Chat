@@ -10,7 +10,7 @@ using System.Text;
 using System.Timers;
 using System.Windows.Forms;
 
-namespace VoiceChat
+namespace Client
 {
 
     public class VoiceClient
@@ -33,7 +33,7 @@ namespace VoiceChat
 
         public VoiceClient()
         {
-            ConnectionHandler.Elapsed += new ElapsedEventHandler(this.CheckConnection);
+            ConnectionHandler.Elapsed += new ElapsedEventHandler(CheckConnection);
             ConnectionHandler.Interval = 5000;
             ConnectionHandler.Enabled = true;
             ConnectionHandler.Start();
@@ -70,7 +70,7 @@ namespace VoiceChat
 
         void CheckConnection(object source, ElapsedEventArgs e)
         {
-            if(!UserClient.Connected && isRunning)
+            if (!UserClient.Connected && isRunning)
             {
                 UserClient.Close();
                 string ipAddress = GetServerIPAddress();
@@ -99,22 +99,22 @@ namespace VoiceChat
 
         void ReceiveData()
         {
-            
+
 
             try
             {
-              
-                
+
+
                 while (isRunning)
                 {
                     // Veri alınana kadar bloklanır
-                    byte[] buffer = new byte[4096*5]; // Veri tamponu boyutu
+                    byte[] buffer = new byte[4096 * 5]; // Veri tamponu boyutu
                     int bytesRead = stream.Read(buffer, 0, buffer.Length);
 
                     // Ses verisini işleyin ve çalın
                     MemoryStream memoryStream = new MemoryStream(buffer, 0, bytesRead);
 
-                    OnVoiceReach?.Invoke(this,new ChatArgs { data = buffer, size = bytesRead });
+                    OnVoiceReach?.Invoke(this, new ChatArgs { data = buffer, size = bytesRead });
 
 
 
@@ -133,11 +133,11 @@ namespace VoiceChat
 
 
 
-public class ChatArgs : EventArgs
-{
-       public byte[] data;
-       public int size;
-}
+    public class ChatArgs : EventArgs
+    {
+        public byte[] data;
+        public int size;
+    }
 
 
 }

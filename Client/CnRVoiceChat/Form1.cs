@@ -1,10 +1,13 @@
+
 using NAudio.CoreAudioApi;
+using NAudio.Gui;
 using NAudio.Wave;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Timers;
-using VoiceChat;
-
+using Client;
+using Vector;
+using Configuration;
 
 namespace CnRVoiceChat
 {
@@ -16,6 +19,7 @@ namespace CnRVoiceChat
         private VoiceClient client;
 
         MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
+        MMDevice microphone;
 
         char pushToTalkKey = 'K';
         bool pushToTalk = false;
@@ -60,8 +64,13 @@ namespace CnRVoiceChat
         private void Init()
         {
 
+            MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
+            microphone = enumerator.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Communications);
+
+            GetConfig();
             try
             {
+
 
                 waveIn.StartRecording();
 
@@ -144,9 +153,6 @@ namespace CnRVoiceChat
         {
             try
             {
-
-                MMDevice microphone = enumerator.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Communications);
-
                 microphone.AudioEndpointVolume.MasterVolumeLevelScalar = volumeSlider1.Volume;
             }
             catch
@@ -155,7 +161,9 @@ namespace CnRVoiceChat
                 return;
             }
 
-            statelabel.Text = "Mikrofon ses duzeyi ayarlandi.";
+            statelabel.Text = "Mikrofon ses seviyesi ayarlandi.";
+
+            Config.Instance.Write("Mikrofon Ses Seviyesi", volumeSlider1.Volume.ToString());
 
         }
 
@@ -163,7 +171,9 @@ namespace CnRVoiceChat
         {
             waveOut.Volume = volumeSlider2.Volume;
 
-            statelabel.Text = "Kullanici ses duzeyi ayarlandi.";
+            statelabel.Text = "Kullanici ses seviyesi ayarlandi.";
+
+            Config.Instance.Write("Kullanici Ses Seviyesi", volumeSlider1.Volume.ToString());
         }
 
         private void retrybutton_Click(object sender, EventArgs e)
@@ -187,7 +197,7 @@ namespace CnRVoiceChat
 
 
 
-        void GetConfig()
+        public void GetConfig()
         {
             string path = "cnr.ini";
             if (!File.Exists(path))
@@ -196,21 +206,24 @@ namespace CnRVoiceChat
                 return;
             }
 
-            StreamReader reader = new StreamReader(path);
 
-            string line;
-            string pattern = @"(\w+)\s*=\s*(\w+)";
-            while ((line = reader.ReadLine()) != null)
-            {
-                Match match = Regex.Match(line, pattern);
-                if(match.Success)
-                {
-                    string key = match.Groups[1].Value;
-                    string value = match.Groups[2].Value;
-                    if()
-                }
+            checkBox1.Checked = Convert.ToBoolean(Config.Instance.Read("Bas-Konus"));
+            pushToTalk = checkBox1.Checked;
 
-            }
+
+            pushToTalkKey = char.Parse(Config.Instance.Read("Bas-Konus Tusu"));
+
+
+            float volume = float.Parse(Config.Instance.Read("Mikrofon Ses Seviyesi"));
+            volumeSlider1.Volume = volume;
+            microphone.AudioEndpointVolume.MasterVolumeLevelScalar = volumeSlider1.Volume;
+
+
+            volume = float.Parse(Config.Instance.Read("Kullanici Ses Seviyesi"));
+            volumeSlider2.Volume = volume;
+            waveOut.Volume = volumeSlider2.Volume;
+
+
         }
 
 
@@ -222,28 +235,25 @@ namespace CnRVoiceChat
             try
             {
 
-                File.Create(path);
+                File.Create(path).Close();
                 StreamWriter writer = new StreamWriter(path);
-                writer.WriteLine("#SA:MP Turkiye CnR Client Ayarlari");
-                writer.WriteLine("#Ayarlarda 0-> Kapali, 1-> Acik anlamina gelir.");
-                writer.WriteLine("#Ses Seviyesi ayarlari 0-1 arasi ondalik sayilarla olmalidir.");
-                writer.WriteLine();
-                writer.WriteLine();
-                writer.WriteLine();
-                writer.WriteLine("{Ayarlar]");
-                writer.WriteLine();
-                writer.WriteLine("Bas-Konus = K");
+                writer.WriteLine("; SA:MP Turkiye CnR Client Ayarlari");
+                writer.WriteLine("; Ayarlarda false -> Kapali, true -> Acik anlamina gelir.");
+                writer.WriteLine("; Ses Seviyesi ayarlari 0-1 arasi ondalik sayilarla olmalidir.");
+                writer.WriteLine("[Sesli Sohbet]");
+                writer.WriteLine("Bas-Konus = false");
+                writer.WriteLine("Yakinlik Hassasiyeti = false");
                 writer.WriteLine("Bas-Konus Tusu = K");
-                writer.WriteLine("Yakinlik Hassasiyeti = 0");
-                writer.WriteLine("Mikrofon Ses Seviyesi = 1");
-                writer.WriteLine("Kullanici Ses Seviyesi = 1");
-
+                writer.WriteLine("Mikrofon Ses Seviyesi = 1.0");
+                writer.WriteLine("Kullanici Ses Seviyesi = 1.0");
+                writer.Close();
             }
             catch
             {
-                statelabel.Text = "Ayarlar dosyasi olusturulamadi!";
+                MessageBox.Show("Ayarlr dosyasi olusturulamadi!", "SA:MP Turkiye CnR", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
 
 
         private void CnRVoiceMain_KeyDown(object sender, KeyEventArgs e)
@@ -254,7 +264,6 @@ namespace CnRVoiceChat
             if (key == userKey && pushToTalk && !isTalking)
             {
                 isTalking = true;
-                MessageBox.Show("Test");
                 waveIn.DataAvailable += WaveIn_DataAvailable;
             }
 
@@ -277,14 +286,19 @@ namespace CnRVoiceChat
         {
             pushToTalk = checkBox1.Checked;
 
+           
 
-
-            if(pushToTalk)
+            if (pushToTalk)
             {
-                MessageBox.Show($"{pushToTalkKey} tusu ile konusabilirsiniz."); 
+                Config.Instance.Write("Bas-Konus", "true");
+                statelabel.Text = ($"{pushToTalkKey} tusu ile konusabilirsiniz.");
                 waveIn.DataAvailable -= WaveIn_DataAvailable;
             }
-            else waveIn.DataAvailable += WaveIn_DataAvailable;
+            else
+            {
+                Config.Instance.Write("Bas-Konus", "false");
+                waveIn.DataAvailable += WaveIn_DataAvailable;
+            }
         }
     }
 }
