@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq.Expressions;
 using System.Net;      //required
 using System.Net.Sockets;    //required
 
@@ -23,61 +24,71 @@ namespace Main
 
             Console.WriteLine("Waiting for connections..");
 
-            while (true)
-            {
-
-                TcpClient client = Listener.AcceptTcpClient();
-
-                clients.Add(client);
-
-                Console.WriteLine("a client connected. IP: {0}, Port: {1}", ((IPEndPoint)client.Client.RemoteEndPoint).Address, ((IPEndPoint)client.Client.RemoteEndPoint).Port);
-
-
-                var clientThread = new System.Threading.Thread(() => HandleClient(client));
-                clientThread.Start();
-            }
-
-        }
-
-
-
-        static void HandleClient(TcpClient client)
-        {
             try
             {
-                NetworkStream stream = client.GetStream();
 
                 while (true)
                 {
-                    byte[] buffer = new byte[4096];
-                    int bytesRead = stream.Read(buffer, 0, buffer.Length);
 
-                    // broadcast
-                    foreach (TcpClient connectedClient in clients)
-                    {
-                        if (connectedClient != client)
-                        {
-                            NetworkStream connectedStream = connectedClient.GetStream();
-                            connectedStream.Write(buffer, 0, bytesRead);
-                        }
-                    }
+                    TcpClient client = Listener.AcceptTcpClient();
+
+                    clients.Add(client);
+
+                    Console.WriteLine("a client connected. IP: {0}, Port: {1}", ((IPEndPoint)client.Client.RemoteEndPoint).Address, ((IPEndPoint)client.Client.RemoteEndPoint).Port);
+
+
+                    var clientThread = new System.Threading.Thread(() => HandleClient(client));
+                    clientThread.Start();
                 }
             }
+
             catch (Exception ex)
             {
+                Console.WriteLine("Fatal Error: {0}", ex.Message);
 
-                clients.Remove(client);
-
-                Console.WriteLine("Error: {0}", ex.Message);
-
-                client.Close();
             }
+
         }
 
 
+
+            static void HandleClient(TcpClient client)
+            {
+                try
+                {
+                    NetworkStream stream = client.GetStream();
+
+                    while (true)
+                    {
+                        byte[] buffer = new byte[4096];
+                        int bytesRead = stream.Read(buffer, 0, buffer.Length);
+
+                        // broadcast
+                        foreach (TcpClient connectedClient in clients)
+                        {
+                            if (connectedClient != client)
+                            {
+                                NetworkStream connectedStream = connectedClient.GetStream();
+                                connectedStream.Write(buffer, 0, bytesRead);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                    clients.Remove(client);
+
+                    Console.WriteLine("Error: {0}", ex.Message);
+
+                    client.Close();
+                }
+            }
+
+
+        }
+
+
+
     }
-
-
-
-}
 
