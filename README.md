@@ -1,4 +1,4 @@
 # C# Voice Chat
-I created this project for my game server but you can use it whatever you want.
+Although initially developed for my game server, this project is versatile and can be adapted to various purposes.
 
 
