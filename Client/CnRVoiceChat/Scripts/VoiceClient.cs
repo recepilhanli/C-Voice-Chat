@@ -1,143 +1,97 @@
-﻿using CnRVoiceChat;
-using System;
-using System.Buffers.Text;
-using System.Diagnostics;
-using System.Diagnostics.Metrics;
-using System.IO;
-using System.Net;
+﻿
 using System.Net.Sockets;
-using System.Text;
 using System.Timers;
-using System.Windows.Forms;
+using Timer = System.Timers.Timer;
 
-namespace Client
+namespace VoiceChat.Client
 {
-
     public class VoiceClient
     {
 
-        private TcpClient UserClient;
-        static NetworkStream stream;
-        static bool isRunning;
+        private const string SERVER_IP = "127.0.0.1";
+        private const int SERVER_PORT = 9999;
 
-        public event EventHandler<ChatArgs> OnVoiceReach;
+        private TcpClient _userClient = null;
+        private static NetworkStream _stream = null;
+        private static bool _isRunning = false;
+        private Timer _connectionHandler = new Timer();
 
-
-        System.Timers.Timer ConnectionHandler = new System.Timers.Timer();
-
-        private string GetServerIPAddress()
-        {
-            return "193.164.6.47";
-        }
-
+        public event EventHandler<ChatArgs> onVoiceReach;
 
         public VoiceClient()
         {
-            ConnectionHandler.Elapsed += new ElapsedEventHandler(CheckConnection);
-            ConnectionHandler.Interval = 5000;
-            ConnectionHandler.Enabled = true;
-            ConnectionHandler.Start();
-
-            try
-            {
-                Init();
-            }
-            catch
-            {
-
-            }
-
+            _connectionHandler.Elapsed += new ElapsedEventHandler(CheckConnection);
+            _connectionHandler.Interval = 5000;
+            _connectionHandler.Enabled = true;
+            _connectionHandler.Start();
+            Init();
         }
-
-
 
 
         void Init()
         {
+            try
+            {
+                _userClient = new TcpClient();
+                _userClient.Connect(SERVER_IP, SERVER_PORT);
+                _stream = _userClient.GetStream();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Socket Err: " + ex.Message);
+            }
 
-            string ipAddress = GetServerIPAddress();
-            int port = 9999;
-            UserClient = new TcpClient();
-            UserClient.Connect(ipAddress, port);
-            stream = UserClient.GetStream();
-
-            isRunning = true;
+            _isRunning = true;
             Thread receiveThread = new Thread(ReceiveData);
             receiveThread.Start();
         }
 
-
-
         void CheckConnection(object source, ElapsedEventArgs e)
         {
-            if (!UserClient.Connected && isRunning)
+            if (!_userClient.Connected && _isRunning)
             {
-                UserClient.Close();
-                string ipAddress = GetServerIPAddress();
+                _userClient.Close();
+                string ipAddress = SERVER_IP;
                 int port = 9999;
-                UserClient = new TcpClient();
-                UserClient.Connect(ipAddress, port);
-                stream = UserClient.GetStream();
+                _userClient = new TcpClient();
+                _userClient.Connect(ipAddress, port);
+                _stream = _userClient.GetStream();
                 Console.WriteLine("Reconnected.");
             }
-            else if (!UserClient.Connected && !isRunning)
+            else if (!_userClient.Connected && !_isRunning)
             {
                 Init();
             }
-
-
         }
-
-
-
 
         public void SendVoice(byte[] buffer, int bytesrecored)
         {
-            stream.Write(buffer, 0, bytesrecored);
+            _stream.Write(buffer, 0, bytesrecored);
         }
-
 
         void ReceiveData()
         {
-
-
             try
             {
-
-
-                while (isRunning)
+                while (_isRunning)
                 {
-                    // Veri alınana kadar bloklanır
-                    byte[] buffer = new byte[4096 * 5]; // Veri tamponu boyutu
-                    int bytesRead = stream.Read(buffer, 0, buffer.Length);
-
-                    // Ses verisini işleyin ve çalın
-                    MemoryStream memoryStream = new MemoryStream(buffer, 0, bytesRead);
-
-                    OnVoiceReach?.Invoke(this, new ChatArgs { data = buffer, size = bytesRead });
-
-
-
+                    byte[] buffer = new byte[4096 * 5];
+                    int bytesRead = _stream.Read(buffer, 0, buffer.Length);
+                    MemoryStream memoryStream = new(buffer, 0, bytesRead);
+                    onVoiceReach?.Invoke(this, new ChatArgs { data = buffer, size = bytesRead });
                 }
             }
             catch (Exception ex)
             {
-
                 Console.WriteLine("Socket Err: " + ex.Message);
             }
         }
     }
-
-
-
-
-
 
     public class ChatArgs : EventArgs
     {
         public byte[] data;
         public int size;
     }
-
 
 }

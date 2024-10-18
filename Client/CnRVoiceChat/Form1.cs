@@ -1,15 +1,10 @@
 
 using NAudio.CoreAudioApi;
-using NAudio.Gui;
 using NAudio.Wave;
 using System.Diagnostics;
-using System.Text.RegularExpressions;
-using System.Timers;
-using Client;
-using Vector;
-using Configuration;
+using VoiceChat.Client.Configuration;
 
-namespace CnRVoiceChat
+namespace VoiceChat.Client.Forms
 {
 
 
@@ -24,10 +19,9 @@ namespace CnRVoiceChat
         char pushToTalkKey = 'K';
         bool pushToTalk = false;
         bool isTalking = false;
+
         //[DllImport("STCnR.asi")]
-
         //private static extern FVector GetPlayerPos(); 
-
 
 
         WaveInEvent waveIn = new NAudio.Wave.WaveInEvent
@@ -50,13 +44,12 @@ namespace CnRVoiceChat
         {
             InitializeComponent();
 
-
-
             if (!pushToTalk) waveIn.DataAvailable += WaveIn_DataAvailable;
 
             waveOut.Init(new WaveProvider());
 
             Init();
+
             //Vector location = Vector.Serialize(GetPlayerPos());
             //MessageBox.Show(location.x + " - " + location.y + " - " + location.z);
         }
@@ -88,7 +81,7 @@ namespace CnRVoiceChat
             retrybutton.Visible = false;
 
             client = new VoiceClient();
-            client.OnVoiceReach += OnVoiceReach;
+            client.onVoiceReach += OnVoiceReach;
 
         }
 
@@ -96,23 +89,7 @@ namespace CnRVoiceChat
 
         void WaveIn_DataAvailable(object? sender, NAudio.Wave.WaveInEventArgs e)
         {
-
-
-            //float maxValue = 0;
-            //for (int i = 0; i < e.BytesRecorded; i += 2)
-            //{
-            //    short sample = (short)((e.Buffer[i + 1] << 8) | e.Buffer[i]);
-            //    float sampleValue = sample / 32768f;
-            //    maxValue = Math.Max(maxValue, Math.Abs(sampleValue));
-            //}
-
-
-            //float threshold = 0.25f;
-
-            //if (maxValue >= threshold)
             client?.SendVoice(e.Buffer, e.BytesRecorded);
-
-
         }
 
 
@@ -184,17 +161,15 @@ namespace CnRVoiceChat
 
         private void Check(object sender, EventArgs e)
         {
+            //San Andreas Multiplayer
             //var processes = Process.GetProcessesByName("gta_sa.exe");
             //if (processes.Length == 0) Process.GetCurrentProcess().Kill();
-
-
         }
 
         private void CnRVoiceMain_FormClosed(object sender, FormClosedEventArgs e)
         {
             Process.GetCurrentProcess().Kill();
         }
-
 
 
         public void GetConfig()
@@ -204,29 +179,28 @@ namespace CnRVoiceChat
             {
                 CreateConfigFile();
                 return;
-            }
+            }   
 
-
+            try
+            {
             checkBox1.Checked = Convert.ToBoolean(Config.Instance.Read("Bas-Konus"));
             pushToTalk = checkBox1.Checked;
 
-
             pushToTalkKey = char.Parse(Config.Instance.Read("Bas-Konus Tusu"));
-
 
             float volume = float.Parse(Config.Instance.Read("Mikrofon Ses Seviyesi"));
             volumeSlider1.Volume = volume;
             microphone.AudioEndpointVolume.MasterVolumeLevelScalar = volumeSlider1.Volume;
 
-
             volume = float.Parse(Config.Instance.Read("Kullanici Ses Seviyesi"));
             volumeSlider2.Volume = volume;
             waveOut.Volume = volumeSlider2.Volume;
-
-
+            }
+            catch (Exception ex) 
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
-
-
 
         void CreateConfigFile()
         {
@@ -253,9 +227,6 @@ namespace CnRVoiceChat
                 MessageBox.Show("Ayarlr dosyasi olusturulamadi!", "SA:MP Turkiye CnR", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-
-
         private void CnRVoiceMain_KeyDown(object sender, KeyEventArgs e)
         {
             char key = Char.ToLower((char)e.KeyCode);

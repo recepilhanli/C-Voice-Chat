@@ -1,94 +1,81 @@
 ﻿using System;
-using System.Linq.Expressions;
-using System.Net;      //required
-using System.Net.Sockets;    //required
+using System.Collections.Concurrent;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace Main
+namespace VoiceChat.Server
 {
-
     class Server
     {
+        private const int SERVER_PORT = 9999;
 
-        private static TcpListener Listener;
-        private static NetworkStream stream;
+        private static TcpListener _listener = null;
+        private static ConcurrentBag<TcpClient> _clients = new ConcurrentBag<TcpClient>();
 
-        static List<TcpClient> clients = new List<TcpClient>();
-
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-
             IPAddress localAddr = IPAddress.Parse("0.0.0.0");
-            Listener = new TcpListener(localAddr, 9999);
+            _listener = new TcpListener(localAddr, SERVER_PORT);
+            _listener.Start();
+            Console.WriteLine("Waiting for connections...");
 
-            Listener.Start();
+            await HandleClientConnections();
+        }
 
-            Console.WriteLine("Waiting for connections..");
-
+        private static async Task HandleClientConnections()
+        {
             try
             {
-
                 while (true)
                 {
+                    TcpClient client = await _listener.AcceptTcpClientAsync();
+                    _clients.Add(client);
+                    Console.WriteLine("Client Connection - IP: {0}, Port: {1}", ((IPEndPoint)client.Client.RemoteEndPoint).Address, ((IPEndPoint)client.Client.RemoteEndPoint).Port);
 
-                    TcpClient client = Listener.AcceptTcpClient();
-
-                    clients.Add(client);
-
-                    Console.WriteLine("a client connected. IP: {0}, Port: {1}", ((IPEndPoint)client.Client.RemoteEndPoint).Address, ((IPEndPoint)client.Client.RemoteEndPoint).Port);
-
-
-                    var clientThread = new System.Threading.Thread(() => HandleClient(client));
-                    clientThread.Start();
+                    _ = Task.Run(() => HandleClientCommunication(client));
                 }
             }
-
             catch (Exception ex)
             {
                 Console.WriteLine("Fatal Error: {0}", ex.Message);
-
             }
-
         }
 
-
-
-            static void HandleClient(TcpClient client)
+        private static async Task HandleClientCommunication(TcpClient client)
+        {
+            try
             {
-                try
+                NetworkStream stream = client.GetStream();
+
+                while (true)
                 {
-                    NetworkStream stream = client.GetStream();
+                    byte[] buffer = new byte[4096];
+                    int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
 
-                    while (true)
+                    if (bytesRead == 0) break; // Client disconnected
+
+                    // Broadcast
+                    foreach (TcpClient connectedClient in _clients)
                     {
-                        byte[] buffer = new byte[4096];
-                        int bytesRead = stream.Read(buffer, 0, buffer.Length);
-
-                        // broadcast
-                        foreach (TcpClient connectedClient in clients)
+                        if (connectedClient != client)
                         {
-                            if (connectedClient != client)
-                            {
-                                NetworkStream connectedStream = connectedClient.GetStream();
-                                connectedStream.Write(buffer, 0, bytesRead);
-                            }
+                            NetworkStream connectedStream = connectedClient.GetStream();
+                            await connectedStream.WriteAsync(buffer, 0, bytesRead);
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-
-                    clients.Remove(client);
-
-                    Console.WriteLine("Error: {0}", ex.Message);
-
-                    client.Close();
-                }
             }
-
-
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: {0}", ex.Message);
+            }
+            finally
+            {
+                _clients.TryTake(out _);
+                client.Close();
+            }
         }
-
-
-
     }
-
+}

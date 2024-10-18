@@ -1,6 +1,7 @@
-using System.Diagnostics;
+using CnRVoiceChat;
 
-namespace CnRVoiceChat
+
+namespace VoiceChat.Client.Forms
 {
     internal static class Program
     {
@@ -8,36 +9,25 @@ namespace CnRVoiceChat
         ///  The main entry point for the application.
         /// </summary>
         /// 
-
+        
         [STAThread]
-
         static void Main(string[] args)
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
+            //bool start = false;
 
-            bool start = false;
+            //foreach (var arg in args)
+            //{
+            //    if (arg.Contains("-start")) start = true;
+            //}
 
-            foreach (var arg in args)
-            {
-                if (arg.Contains("-start")) start = true;
-            }
-
-            if (!start)
-            {
-                //Process.GetCurrentProcess().Kill();
-                //return;
-            }
+            //if (!start)
+            //{
+            //    Process.GetCurrentProcess().Kill();
+            //    return;
+            //}
 
             ApplicationConfiguration.Initialize();
             Application.Run(new CnRVoiceMain());
         }
-
-
-
-
-
-
-
     }
 }

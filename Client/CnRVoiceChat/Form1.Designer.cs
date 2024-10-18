@@ -1,4 +1,4 @@
-﻿namespace CnRVoiceChat
+﻿namespace VoiceChat.Client.Forms
 {
     partial class CnRVoiceMain
     {
